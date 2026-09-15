@@ -36,7 +36,7 @@ const faqSchema = {
     </div>
   </div>
 </section>
-<set:html value={`<script type="application/ld+json">${JSON.stringify(faqSchema)}</script>`} />
+<script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
 
 <style>
   .faq__grid {

@@ -89,7 +89,7 @@ const schema = {
     <script is:inline>
       document.documentElement.classList.remove('no-js');
     </script>
-    <set:html value={`<script type="application/ld+json">${JSON.stringify(schema)}</script>`} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
   </head>
 
   <body>
