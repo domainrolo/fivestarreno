@@ -45,9 +45,15 @@ Every photo is a generic stock image from Unsplash, downloaded into
 `public/images/`. Captions describe the *type* of work, never a specific job, so
 no page claims a project that did not happen.
 
+Each photo is committed at two or three widths, as both JPEG and WebP. Pages
+serve the WebP through a `<picture>` element and keep the JPEG as the fallback;
+re-encoding locally rather than taking Unsplash's WebP cuts the payload 54%
+(14.7 MB to 6.7 MB), which on the hero is a 1.2 MB LCP image down to 570 KB.
+
 Replace them as real job photos come in: drop `public/images/<slug>-1280.jpg`
-and `<slug>-640.jpg` over the existing files and nothing else needs to change.
-Alt text lives in [`src/data/images.ts`](src/data/images.ts); update it to match.
+and `<slug>-640.jpg` over the existing files, run `npm run images:webp` to
+regenerate the WebP, and nothing else needs to change. Alt text lives in
+[`src/data/images.ts`](src/data/images.ts); update it to match.
 
 Real photos of your own work are worth more than any other change you could make
 to this site.
@@ -68,7 +74,8 @@ npm run dev        # http://localhost:4321
 | `npm run build` | Static build into `dist/` |
 | `npm run preview` | Preview the build with Astro |
 | `npm start` | Serve `dist/` with the production server (what Railway runs) |
-| `npm run images` | Fetch missing photos. `-- --force` re-fetches everything |
+| `npm run images` | Fetch missing photos, then build their WebP versions |
+| `npm run images:webp` | Rebuild WebP only. `-- --force` redoes all of them |
 
 ---
 

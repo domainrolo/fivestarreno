@@ -18,19 +18,25 @@ interface Props {
 const { slug, lang, sizes, class: className, priority = false, alt, width, height } = Astro.props;
 const p = photo(slug);
 const largest = p.widths[p.widths.length - 1];
-const srcset = p.widths.map((w) => `/images/${p.slug}-${w}.jpg ${w}w`).join(', ');
+
+// WebP first, JPEG as the fallback. Both are committed by npm run images, and
+// the WebP is about half the weight at the same quality.
+const set = (ext: string) => p.widths.map((w) => `/images/${p.slug}-${w}.${ext} ${w}w`).join(', ');
 const altText = alt !== undefined ? alt : p.alt[lang];
 ---
-<img
-  src={`/images/${p.slug}-${largest}.jpg`}
-  srcset={srcset}
-  sizes={sizes}
-  alt={altText}
-  class={className}
-  width={width ?? largest}
-  height={height ?? Math.round(largest * 0.667)}
-  loading={priority ? 'eager' : 'lazy'}
-  decoding={priority ? 'sync' : 'async'}
-  fetchpriority={priority ? 'high' : undefined}
-  draggable="false"
-/>
+<picture>
+  <source type="image/webp" srcset={set('webp')} sizes={sizes} />
+  <img
+    src={`/images/${p.slug}-${largest}.jpg`}
+    srcset={set('jpg')}
+    sizes={sizes}
+    alt={altText}
+    class={className}
+    width={width ?? largest}
+    height={height ?? Math.round(largest * 0.667)}
+    loading={priority ? 'eager' : 'lazy'}
+    decoding={priority ? 'sync' : 'async'}
+    fetchpriority={priority ? 'high' : undefined}
+    draggable="false"
+  />
+</picture>

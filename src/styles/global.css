@@ -93,8 +93,15 @@ html[lang^='ko'] body {
   overflow-wrap: break-word;
 }
 
-img, picture, video, svg { display: block; max-width: 100%; }
+img, video, svg { display: block; max-width: 100%; }
 img { height: auto; background: var(--paper-3); }
+
+/* Every <picture> here exists only to offer a WebP source. It must not become
+   a box of its own: the layout sizes the <img>, and a wrapper that does not
+   inherit that sizing collapses the image to its intrinsic ratio. This is
+   global because the <picture> is emitted by the Picture component and so
+   never carries the scope of whatever styles its parent. */
+picture { display: contents; }
 
 h1, h2, h3, h4 {
   margin: 0;

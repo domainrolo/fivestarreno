@@ -84,7 +84,7 @@ const filters = [
 
 <dialog class="lightbox" id="lightbox" aria-label={d.gallery.lightbox.counter}>
   <div class="lightbox__inner">
-    <img class="lightbox__img" id="lb-img" src="" alt="" />
+    <img class="lightbox__img" id="lb-img" alt="" />
     <p class="lightbox__cap" id="lb-cap"></p>
   </div>
   <button type="button" class="lightbox__btn lightbox__close" id="lb-close">
@@ -140,7 +140,7 @@ const filters = [
       const slug = tile.querySelector('.tile__btn')?.getAttribute('data-slug');
       const meta = items.find((it) => it.slug === slug);
       if (!meta) return;
-      img.src = `/images/${meta.slug}-${meta.w}.jpg`;
+      img.src = `/images/${meta.slug}-${meta.w}.webp`;
       img.alt = meta.alt;
       cap.textContent = meta.alt;
       count.textContent = `${wrapped + 1} / ${list.length}`;
@@ -165,7 +165,7 @@ const filters = [
 
     dialog.addEventListener('close', () => {
       document.body.style.overflow = '';
-      img.src = '';
+      img.removeAttribute('src');
       opener?.focus();
     });
 
