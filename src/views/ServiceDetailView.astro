@@ -16,12 +16,20 @@ const idx = d.services.items.findIndex((s) => s.slug === slug);
 if (idx < 0) throw new Error(`Unknown service slug: ${slug}`);
 const s = d.services.items[idx];
 const others = d.services.items.filter((o) => o.slug !== slug).slice(0, 3);
+
+// The blurb alone is under the length search engines will render, especially
+// in Korean where the same sentence is far denser, so pin the standing offer
+// and the phone number onto it.
+const tail = lang === 'ko'
+  ? '토론토와 광역 토론토 지역에서 시공합니다. 현장 방문 견적은 무료입니다. 647-893-8134로 전화 주십시오.'
+  : 'Serving Toronto and the GTA. Free on-site estimates. Call 647-893-8134.';
+const metaDescription = `${s.blurb} ${tail}`;
 ---
 <Base
   lang={lang}
   path={`/services/${slug}`}
   title={`${s.title} | ${lang === 'ko' ? site.nameKo : site.name}`}
-  description={s.blurb}
+  description={metaDescription}
   ogImage={`/images/${s.photo}-1280.jpg`}
 >
   <section class="sd-hero on-ink grain">
