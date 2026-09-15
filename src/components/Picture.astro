@@ -1,0 +1,36 @@
+---
+import { photo } from '~/data/images';
+import type { Lang } from '~/i18n';
+
+interface Props {
+  slug: string;
+  lang: Lang;
+  sizes: string;
+  class?: string;
+  /** First paint above the fold. Sets eager loading and high fetch priority. */
+  priority?: boolean;
+  /** Overrides the manifest alt text. Use '' only for decorative images. */
+  alt?: string;
+  width?: number;
+  height?: number;
+}
+
+const { slug, lang, sizes, class: className, priority = false, alt, width, height } = Astro.props;
+const p = photo(slug);
+const largest = p.widths[p.widths.length - 1];
+const srcset = p.widths.map((w) => `/images/${p.slug}-${w}.jpg ${w}w`).join(', ');
+const altText = alt !== undefined ? alt : p.alt[lang];
+---
+<img
+  src={`/images/${p.slug}-${largest}.jpg`}
+  srcset={srcset}
+  sizes={sizes}
+  alt={altText}
+  class={className}
+  width={width ?? largest}
+  height={height ?? Math.round(largest * 0.667)}
+  loading={priority ? 'eager' : 'lazy'}
+  decoding={priority ? 'sync' : 'async'}
+  fetchpriority={priority ? 'high' : undefined}
+  draggable="false"
+/>

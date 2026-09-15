@@ -1,0 +1,349 @@
+---
+import Icon from '~/components/Icon.astro';
+import { t, type Lang } from '~/i18n';
+import { site } from '~/data/site';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+const f = d.contact.form;
+const hours = lang === 'ko' ? site.hoursKo : site.hours;
+---
+<section class="section contact" aria-labelledby="form-h">
+  <div class="wrap contact__grid">
+    <div class="contact__aside">
+      <div class="reveal">
+        <p class="eyebrow">{d.contact.eyebrow}</p>
+        <h2 class="h2" id="form-h">{d.contact.heading}</h2>
+        <p class="lead contact__lead">{d.contact.lead}</p>
+      </div>
+
+      <ul class="detail reveal">
+        <li>
+          <span class="detail__k"><Icon name="phone" size={16} />{d.contact.phoneLabel}</span>
+          <a class="detail__big" href={site.phoneHref}>{site.phone}</a>
+          <a class="detail__sub" href={site.smsHref}>{d.cta.text}</a>
+        </li>
+        <li>
+          <span class="detail__k"><Icon name="mail" size={16} />{d.contact.emailLabel}</span>
+          <a class="detail__v" href={`mailto:${site.email}`}>{site.email}</a>
+        </li>
+        <li>
+          <span class="detail__k"><Icon name="clock" size={16} />{d.contact.hoursLabel}</span>
+          <ul class="detail__hours">
+            {hours.map((h) => <li><span>{h.days}</span><span>{h.time}</span></li>)}
+          </ul>
+        </li>
+        <li>
+          <span class="detail__k"><Icon name="pin" size={16} />{d.contact.areaLabel}</span>
+          <span class="detail__v">{lang === 'ko' ? site.regionKo : site.region}</span>
+        </li>
+      </ul>
+    </div>
+
+    <form class="form reveal" id="quote-form" novalidate>
+      <div class="form__row">
+        <div class="field">
+          <label for="q-name">{f.name} <span class="req" aria-hidden="true">*</span></label>
+          <input id="q-name" name="name" type="text" autocomplete="name" required
+                 placeholder={f.namePlaceholder} />
+          <p class="err" data-err-for="q-name" hidden>{f.errorRequired}</p>
+        </div>
+        <div class="field">
+          <label for="q-phone">{f.phone} <span class="req" aria-hidden="true">*</span></label>
+          <input id="q-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required
+                 placeholder={f.phonePlaceholder} />
+          <p class="err" data-err-for="q-phone" hidden>{f.errorPhone}</p>
+        </div>
+      </div>
+
+      <div class="form__row">
+        <div class="field">
+          <label for="q-email">{f.email}</label>
+          <input id="q-email" name="email" type="email" inputmode="email" autocomplete="email"
+                 placeholder={f.emailPlaceholder} />
+          <p class="err" data-err-for="q-email" hidden>{f.errorEmail}</p>
+        </div>
+        <div class="field">
+          <label for="q-address">{f.address} <span class="opt">({f.optional})</span></label>
+          <input id="q-address" name="address" type="text" autocomplete="postal-code"
+                 placeholder={f.addressPlaceholder} />
+        </div>
+      </div>
+
+      <div class="form__row">
+        <div class="field">
+          <label for="q-service">{f.service}</label>
+          <div class="select">
+            <select id="q-service" name="service">
+              {f.serviceOptions.map((o) => <option value={o}>{o}</option>)}
+            </select>
+            <Icon name="chevron" size={18} class="select__i" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="q-timeline">{f.timeline}</label>
+          <div class="select">
+            <select id="q-timeline" name="timeline">
+              {f.timelineOptions.map((o) => <option value={o}>{o}</option>)}
+            </select>
+            <Icon name="chevron" size={18} class="select__i" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form__row">
+        <div class="field">
+          <label for="q-budget">{f.budget}</label>
+          <div class="select">
+            <select id="q-budget" name="budget">
+              {f.budgetOptions.map((o) => <option value={o}>{o}</option>)}
+            </select>
+            <Icon name="chevron" size={18} class="select__i" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="q-language">{f.language}</label>
+          <div class="select">
+            <select id="q-language" name="language">
+              {f.languageOptions.map((o) => (
+                <option value={o} selected={lang === 'ko' ? o === '한국어' : o === 'English'}>{o}</option>
+              ))}
+            </select>
+            <Icon name="chevron" size={18} class="select__i" />
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="q-message">{f.message}</label>
+        <textarea id="q-message" name="message" rows="5" placeholder={f.messagePlaceholder}></textarea>
+      </div>
+
+      <!-- Spam trap. A real person never fills this in; it is hidden from
+           assistive technology and from the tab order. -->
+      <div class="pot" aria-hidden="true">
+        <label for="q-company">Company</label>
+        <input id="q-company" name="company" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <div class="field field--check">
+        <input id="q-consent" name="consent" type="checkbox" required />
+        <label for="q-consent">{f.consent} <span class="req" aria-hidden="true">*</span></label>
+      </div>
+      <p class="err" data-err-for="q-consent" hidden>{f.errorConsent}</p>
+
+      <div class="form__actions">
+        <button class="btn form__submit" type="submit">
+          {f.submit}<Icon name="arrow" size={18} />
+        </button>
+        <button class="btn btn--ghost form__copy" type="button" id="q-copy">
+          <Icon name="copy" size={17} />{f.copy}
+        </button>
+      </div>
+
+      <p class="form__note">{f.opensEmail}</p>
+      <p class="form__done" id="q-status" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+<script is:inline define:vars={{ to: site.email, subject: d.contact.form.subject, copiedMsg: d.contact.form.copied, labels: {
+  name: d.contact.form.name, phone: d.contact.form.phone, email: d.contact.form.email,
+  address: d.contact.form.address, service: d.contact.form.service, timeline: d.contact.form.timeline,
+  budget: d.contact.form.budget, language: d.contact.form.language, message: d.contact.form.message,
+} }}>
+  (() => {
+    const form = document.getElementById('quote-form');
+    if (!form) return;
+    const status = document.getElementById('q-status');
+
+    const showError = (id, on) => {
+      const el = document.querySelector(`[data-err-for="${id}"]`);
+      const input = document.getElementById(id);
+      if (el) el.hidden = !on;
+      if (input) {
+        input.setAttribute('aria-invalid', on ? 'true' : 'false');
+        if (el && el.id !== `${id}-err`) el.id = `${id}-err`;
+        if (on) input.setAttribute('aria-describedby', `${id}-err`);
+        else input.removeAttribute('aria-describedby');
+      }
+    };
+
+    const validate = () => {
+      let ok = true;
+      let firstBad = null;
+
+      const name = document.getElementById('q-name');
+      const badName = !name.value.trim();
+      showError('q-name', badName);
+      if (badName) { ok = false; firstBad ||= name; }
+
+      const phone = document.getElementById('q-phone');
+      const digits = phone.value.replace(/\D/g, '');
+      const badPhone = digits.length < 10;
+      showError('q-phone', badPhone);
+      if (badPhone) { ok = false; firstBad ||= phone; }
+
+      const email = document.getElementById('q-email');
+      const badEmail = email.value.trim() !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim());
+      showError('q-email', badEmail);
+      if (badEmail) { ok = false; firstBad ||= email; }
+
+      const consent = document.getElementById('q-consent');
+      const badConsent = !consent.checked;
+      showError('q-consent', badConsent);
+      if (badConsent) { ok = false; firstBad ||= consent; }
+
+      if (firstBad) firstBad.focus();
+      return ok;
+    };
+
+    const compose = () => {
+      const g = (id) => (document.getElementById(id)?.value ?? '').trim();
+      const lines = [
+        `${labels.name}: ${g('q-name')}`,
+        `${labels.phone}: ${g('q-phone')}`,
+        g('q-email') && `${labels.email}: ${g('q-email')}`,
+        g('q-address') && `${labels.address}: ${g('q-address')}`,
+        `${labels.service}: ${g('q-service')}`,
+        `${labels.timeline}: ${g('q-timeline')}`,
+        `${labels.budget}: ${g('q-budget')}`,
+        `${labels.language}: ${g('q-language')}`,
+        '',
+        `${labels.message}:`,
+        g('q-message') || '-',
+      ].filter(Boolean);
+      return lines.join('\n');
+    };
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // Honeypot filled means a bot. Pretend it worked and send nothing.
+      if (document.getElementById('q-company')?.value) return;
+      if (!validate()) return;
+      const body = compose();
+      const href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.location.href = href;
+    });
+
+    document.getElementById('q-copy')?.addEventListener('click', async () => {
+      const text = compose();
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch { /* clipboard unavailable */ }
+        ta.remove();
+      }
+      if (status) status.textContent = copiedMsg;
+    });
+
+    // Clear an error as soon as the visitor starts fixing it.
+    form.addEventListener('input', (e) => {
+      const el = e.target;
+      if (el && el.id && el.getAttribute('aria-invalid') === 'true') showError(el.id, false);
+    });
+  })();
+</script>
+
+<style>
+  .contact__grid {
+    display: grid; gap: clamp(2.25rem, 5vw, 4rem);
+    grid-template-columns: 1fr; align-items: start;
+  }
+  @media (min-width: 980px) { .contact__grid { grid-template-columns: 0.78fr 1fr; } }
+
+  .contact__aside { display: grid; gap: 2.25rem; }
+  .contact__lead { margin-top: 1.1rem; }
+
+  .detail { display: grid; gap: 1.4rem; }
+  .detail > li { display: grid; gap: 0.35rem; }
+  .detail__k {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-3);
+  }
+  :global(html[lang^='ko']) .detail__k { letter-spacing: 0.06em; }
+  .detail__k :global(svg) { color: var(--brass); }
+  .detail__big {
+    font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.1rem); font-weight: 700;
+    letter-spacing: -0.025em; color: var(--text); text-decoration: none;
+    font-variant-numeric: tabular-nums; line-height: 1.1;
+  }
+  .detail__big:hover { color: var(--brass-ink); }
+  .detail__sub { font-size: 0.87rem; font-weight: 600; color: var(--brass-ink); justify-self: start; }
+  .detail__v { color: var(--text-2); word-break: break-word; }
+  .detail__hours { display: grid; gap: 0.25rem; }
+  .detail__hours li { display: flex; justify-content: space-between; gap: 1rem; max-width: 22rem; font-size: 0.9rem; color: var(--text-2); }
+  .detail__hours span:first-child { color: var(--text); }
+
+  /* ---- Form ------------------------------------------------------------- */
+  .form {
+    display: grid; gap: 1.1rem;
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); padding: clamp(1.4rem, 3vw, 2.25rem);
+    box-shadow: var(--shadow-sm);
+  }
+  .form__row { display: grid; gap: 1.1rem; }
+  @media (min-width: 560px) { .form__row { grid-template-columns: 1fr 1fr; } }
+
+  .field { display: grid; gap: 0.4rem; }
+  .field label { font-size: 0.86rem; font-weight: 600; color: var(--text); }
+  .req { color: var(--brass-ink); }
+  .opt { font-weight: 400; color: var(--text-3); }
+
+  .field input[type='text'],
+  .field input[type='tel'],
+  .field input[type='email'],
+  .field textarea,
+  .select select {
+    width: 100%; padding: 0.8rem 0.9rem; min-height: 48px;
+    font-size: 16px; /* keeps iOS from zooming on focus */
+    background: var(--paper-2); color: var(--text);
+    border: 1px solid var(--line); border-radius: var(--radius);
+    transition: border-color 0.2s var(--ease), background 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  }
+  .field textarea { resize: vertical; line-height: 1.6; min-height: 8rem; }
+  .field input::placeholder, .field textarea::placeholder { color: var(--text-3); opacity: 0.85; }
+  .field input:focus, .field textarea:focus, .select select:focus {
+    background: var(--paper); border-color: var(--brass);
+    box-shadow: 0 0 0 3px rgba(160, 99, 15, 0.14);
+    outline: none;
+  }
+  .field input[aria-invalid='true'], .field textarea[aria-invalid='true'] {
+    border-color: #b3261e; background: #fdf3f2;
+  }
+
+  .select { position: relative; display: grid; }
+  .select select { appearance: none; padding-inline-end: 2.6rem; cursor: pointer; }
+  .select :global(.select__i) {
+    position: absolute; right: 0.85rem; top: 50%; translate: 0 -50%;
+    pointer-events: none; color: var(--text-3);
+  }
+
+  .field--check { grid-template-columns: auto 1fr; align-items: start; gap: 0.7rem; }
+  .field--check input {
+    width: 22px; height: 22px; margin-top: 2px; accent-color: var(--brass); flex: none;
+  }
+  .field--check label { font-weight: 400; font-size: 0.9rem; color: var(--text-2); line-height: 1.55; }
+
+  .err { margin: 0; font-size: 0.82rem; color: #b3261e; font-weight: 500; }
+
+  .pot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  .form__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.4rem; }
+  .form__submit { flex: 1 1 15rem; }
+  .form__copy { flex: 0 1 auto; }
+  .form__note { margin: 0; font-size: 0.82rem; color: var(--text-3); line-height: 1.6; }
+  .form__done:not(:empty) {
+    margin: 0; padding: 0.7rem 0.9rem; border-radius: var(--radius);
+    background: var(--brass-wash); color: var(--brass-ink);
+    font-size: 0.87rem; font-weight: 600;
+  }
+</style>

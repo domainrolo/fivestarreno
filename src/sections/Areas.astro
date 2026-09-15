@@ -1,0 +1,42 @@
+---
+import Icon from '~/components/Icon.astro';
+import { t, type Lang } from '~/i18n';
+import { serviceAreas } from '~/data/site';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+---
+<section class="section section--tight" aria-labelledby="area-h">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">{d.areas.eyebrow}</p>
+      <h2 class="h2" id="area-h">{d.areas.heading}</h2>
+      <p class="lead">{d.areas.lead}</p>
+    </div>
+    <ul class="areas reveal">
+      {serviceAreas.map((a, i) => (
+        <li class="area" style={`--reveal-delay:${Math.min(i, 10) * 26}ms`}>
+          <Icon name="pin" size={14} class="area__i" />{a}
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .areas { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .area {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.5rem 0.95rem;
+    border: 1px solid var(--line); border-radius: 100px;
+    font-size: 0.87rem; color: var(--text-2); background: var(--paper);
+    transition: border-color 0.24s var(--ease), color 0.24s var(--ease),
+                background 0.24s var(--ease), transform 0.24s var(--ease);
+  }
+  .area:hover {
+    border-color: var(--brass); color: var(--brass-ink);
+    background: var(--brass-wash); transform: translateY(-2px);
+  }
+  .area :global(.area__i) { color: var(--brass); flex: none; }
+</style>

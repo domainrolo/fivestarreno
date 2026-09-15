@@ -1,0 +1,43 @@
+---
+import Icon from './Icon.astro';
+import { t, href, type Lang } from '~/i18n';
+import { site } from '~/data/site';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+---
+<div class="callbar" role="group" aria-label={d.cta.callNow}>
+  <a class="callbar__btn callbar__btn--call" href={site.phoneHref}>
+    <Icon name="phone" size={18} />
+    <span>{site.phone}</span>
+  </a>
+  <a class="callbar__btn callbar__btn--quote" href={href(lang, '/contact')}>
+    <Icon name="ruler" size={18} />
+    <span>{d.cta.primary}</span>
+  </a>
+</div>
+
+<style>
+  .callbar {
+    position: fixed; inset-inline: 0; bottom: 0; z-index: 50;
+    display: grid; grid-template-columns: 1fr 1fr;
+    background: var(--ink);
+    border-top: 1px solid var(--line-ink);
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -8px 28px rgba(18, 23, 28, 0.22);
+  }
+  @media (min-width: 721px) { .callbar { display: none; } }
+
+  .callbar__btn {
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    min-height: 58px; padding: 0.5rem 0.6rem;
+    text-decoration: none; font-size: 0.92rem; font-weight: 600;
+    text-align: center; line-height: 1.2;
+  }
+  .callbar__btn--call { color: var(--on-ink); font-variant-numeric: tabular-nums; }
+  .callbar__btn--call:active { background: var(--ink-3); }
+  .callbar__btn--quote { background: var(--brass); color: #fff; }
+  .callbar__btn--quote:active { background: var(--brass-hi); }
+  .callbar__btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+</style>

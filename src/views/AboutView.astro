@@ -1,0 +1,62 @@
+---
+import Base from '~/layouts/Base.astro';
+import PageHead from '~/components/PageHead.astro';
+import Picture from '~/components/Picture.astro';
+import Why from '~/sections/Why.astro';
+import Stats from '~/sections/Stats.astro';
+import Areas from '~/sections/Areas.astro';
+import CtaBand from '~/sections/CtaBand.astro';
+import { t, type Lang } from '~/i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+const p = d.pages.about;
+---
+<Base lang={lang} path="/about" title={p.title} description={p.description}>
+  <PageHead lang={lang} eyebrow={p.eyebrow} heading={p.heading} lead={p.lead} photo="craft-carpenter" />
+
+  <section class="section about">
+    <div class="wrap about__grid">
+      <div class="about__body">
+        {p.body.map((b, i) => (
+          <article class="about__block reveal" style={`--reveal-delay:${i * 70}ms`}>
+            <h2 class="h3 about__h">{b.h}</h2>
+            <p class="about__p">{b.p}</p>
+          </article>
+        ))}
+      </div>
+      <aside class="about__side">
+        <div class="about__photo reveal">
+          <Picture slug="work-insulation" lang={lang} sizes="(min-width: 980px) 34vw, 92vw" class="about__img" />
+        </div>
+        <div class="about__photo reveal" style="--reveal-delay:90ms">
+          <Picture slug="g-home-millwork" lang={lang} sizes="(min-width: 980px) 34vw, 92vw" class="about__img" />
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <Why lang={lang} />
+  <Stats lang={lang} />
+  <Areas lang={lang} />
+  <CtaBand lang={lang} />
+</Base>
+
+<style>
+  .about__grid {
+    display: grid; gap: clamp(2rem, 5vw, 4rem);
+    grid-template-columns: 1fr; align-items: start;
+  }
+  @media (min-width: 980px) { .about__grid { grid-template-columns: 1fr 0.62fr; } }
+
+  .about__body { display: grid; gap: clamp(2rem, 4vw, 2.75rem); }
+  .about__block { border-top: 1px solid var(--line); padding-top: 1.4rem; }
+  .about__h { margin-bottom: 0.7rem; }
+  .about__p { margin: 0; color: var(--text-2); font-size: 1.02rem; line-height: 1.76; max-width: 64ch; }
+
+  .about__side { display: grid; gap: 1rem; }
+  @media (max-width: 979px) { .about__side { grid-template-columns: 1fr 1fr; } }
+  .about__photo { border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4 / 3; }
+  .about__photo :global(.about__img) { width: 100%; height: 100%; object-fit: cover; }
+</style>

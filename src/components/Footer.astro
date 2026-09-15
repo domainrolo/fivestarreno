@@ -1,0 +1,140 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { t, href, otherLang, type Lang } from '~/i18n';
+import { site, serviceAreas } from '~/data/site';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+const other = otherLang(lang);
+const year = new Date().getFullYear();
+const hours = lang === 'ko' ? site.hoursKo : site.hours;
+---
+<footer class="foot on-ink">
+  <div class="wrap">
+    <div class="foot__top">
+      <div class="foot__brand">
+        <Logo tone="paper" />
+        <p class="foot__blurb">{d.footer.blurb}</p>
+        <a class="foot__bigphone" href={site.phoneHref}>
+          <Icon name="phone" size={20} /><span>{site.phone}</span>
+        </a>
+        <a class="foot__mail" href={`mailto:${site.email}`}>
+          <Icon name="mail" size={16} /><span>{site.email}</span>
+        </a>
+      </div>
+
+      <nav class="foot__col" aria-labelledby="f-svc">
+        <h2 class="foot__h" id="f-svc">{d.footer.servicesHeading}</h2>
+        <ul>
+          {d.services.items.map((s) => (
+            <li><a href={href(lang, `/services/${s.slug}`)}>{s.title}</a></li>
+          ))}
+        </ul>
+      </nav>
+
+      <nav class="foot__col" aria-labelledby="f-co">
+        <h2 class="foot__h" id="f-co">{d.footer.companyHeading}</h2>
+        <ul>
+          <li><a href={href(lang, '/')}>{d.nav.home}</a></li>
+          <li><a href={href(lang, '/services')}>{d.nav.services}</a></li>
+          <li><a href={href(lang, '/work')}>{d.nav.work}</a></li>
+          <li><a href={href(lang, '/about')}>{d.nav.about}</a></li>
+          <li><a href={href(lang, '/contact')}>{d.nav.contact}</a></li>
+          <li><a href={href(other, '/')} lang={other === 'ko' ? 'ko' : 'en'} hreflang={other === 'ko' ? 'ko-CA' : 'en-CA'}>{d.otherLabel}</a></li>
+        </ul>
+      </nav>
+
+      <div class="foot__col">
+        <h2 class="foot__h">{d.contact.hoursLabel}</h2>
+        <ul class="foot__hours">
+          {hours.map((h) => (
+            <li><span>{h.days}</span><span>{h.time}</span></li>
+          ))}
+        </ul>
+        <h2 class="foot__h foot__h--gap">{d.footer.areasHeading}</h2>
+        <p class="foot__region">{lang === 'ko' ? site.regionKo : site.region}</p>
+      </div>
+    </div>
+
+    <div class="foot__areas">
+      <h2 class="sr-only">{d.footer.areasHeading}</h2>
+      <ul>{serviceAreas.map((a) => <li>{a}</li>)}</ul>
+    </div>
+
+    <div class="foot__legal">
+      <p>&copy; {year} {lang === 'ko' ? site.nameKo : site.name}. {d.footer.rights}</p>
+      <p>{d.footer.disclaimer}</p>
+      {site.hstNumber && <p>{d.footer.hst}: {site.hstNumber}</p>}
+      <p class="foot__credit">{d.footer.photoCredit}</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    background: var(--ink); color: var(--on-ink-2);
+    padding: clamp(3.5rem, 7vw, 6rem) 0 calc(2rem + env(safe-area-inset-bottom));
+    font-size: 0.93rem;
+  }
+  @media (max-width: 720px) { .foot { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); } }
+
+  .foot__top {
+    display: grid; gap: clamp(2rem, 4vw, 3rem);
+    grid-template-columns: 1fr;
+    padding-bottom: 2.5rem;
+  }
+  @media (min-width: 640px) { .foot__top { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1000px) { .foot__top { grid-template-columns: 1.6fr 1fr 1fr 1.1fr; } }
+
+  .foot__blurb { margin: 1.1rem 0 1.5rem; max-width: 34ch; color: var(--on-ink-2); }
+
+  .foot__bigphone {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    font-family: var(--font-display); font-size: 1.5rem; font-weight: 700;
+    color: var(--brass-glow); text-decoration: none; font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .foot__bigphone:hover { color: #fff; }
+  .foot__mail {
+    display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.7rem;
+    color: var(--on-ink-2); text-decoration: none; word-break: break-all;
+  }
+  .foot__mail:hover { color: var(--on-ink); }
+
+  .foot__h {
+    font-family: var(--font-body);
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--on-ink); margin: 0 0 1rem;
+  }
+  .foot__h--gap { margin-top: 1.75rem; }
+
+  .foot__col ul { display: flex; flex-direction: column; gap: 0.55rem; }
+  .foot__col a { color: var(--on-ink-2); text-decoration: none; }
+  .foot__col a:hover { color: var(--brass-glow); text-decoration: underline; text-underline-offset: 0.25em; }
+
+  .foot__hours li { display: flex; justify-content: space-between; gap: 1rem; }
+  .foot__hours span:first-child { color: var(--on-ink); }
+  .foot__region { color: var(--on-ink-2); margin: 0; }
+
+  .foot__areas { border-top: 1px solid var(--line-ink); padding: 1.6rem 0; }
+  .foot__areas ul { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; }
+  .foot__areas li {
+    font-size: 0.82rem; color: var(--on-ink-3);
+    position: relative; padding-inline-end: 0.9rem;
+  }
+  .foot__areas li::after {
+    content: '·'; position: absolute; right: 0; top: 0; color: rgba(251,249,246,.28);
+  }
+  .foot__areas li:last-child { padding-inline-end: 0; }
+  .foot__areas li:last-child::after { content: none; }
+
+  .foot__legal {
+    border-top: 1px solid var(--line-ink); padding-top: 1.6rem;
+    display: grid; gap: 0.6rem;
+    font-size: 0.82rem; color: var(--on-ink-3); line-height: 1.6;
+  }
+  .foot__legal p { margin: 0; max-width: 78ch; }
+  .foot__credit { opacity: 0.72; }
+</style>

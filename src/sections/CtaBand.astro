@@ -1,0 +1,56 @@
+---
+import Icon from '~/components/Icon.astro';
+import Picture from '~/components/Picture.astro';
+import { t, href, type Lang } from '~/i18n';
+import { site } from '~/data/site';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+---
+<section class="cta-band on-ink grain" aria-labelledby="cta-h">
+  <div class="cta-band__media" aria-hidden="true">
+    <Picture slug="band-openplan" lang={lang} sizes="100vw" class="cta-band__img" alt="" />
+  </div>
+  <div class="wrap cta-band__inner">
+    <p class="eyebrow">{d.contact.eyebrow}</p>
+    <h2 class="h1 cta-band__h" id="cta-h">{d.contact.heading}</h2>
+    <p class="lead cta-band__lead">{d.contact.lead}</p>
+    <div class="btn-row cta-band__row">
+      <a class="btn" href={site.phoneHref}>
+        <Icon name="phone" size={18} />{site.phone}
+      </a>
+      <a class="btn btn--ghost" href={href(lang, '/contact')}>
+        {d.cta.primary}<Icon name="arrow" size={18} />
+      </a>
+    </div>
+    <a class="cta-band__mail" href={`mailto:${site.email}`}>
+      <Icon name="mail" size={16} />{site.email}
+    </a>
+  </div>
+</section>
+
+<style>
+  .cta-band {
+    position: relative; isolation: isolate; overflow: hidden;
+    background: var(--ink); color: var(--on-ink);
+    padding: clamp(4rem, 8vw, 7rem) 0;
+    text-align: center;
+  }
+  .cta-band__media { position: absolute; inset: 0; z-index: -2; }
+  .cta-band__media :global(.cta-band__img) { width: 100%; height: 100%; object-fit: cover; }
+  .cta-band::before {
+    content: ''; position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(to bottom, rgba(12,16,20,.90), rgba(12,16,20,.82));
+  }
+  .cta-band__inner { position: relative; display: grid; justify-items: center; }
+  .cta-band__h { color: #fff; max-width: 20ch; }
+  .cta-band__lead { color: rgba(251,249,246,.86); margin-top: 1.1rem; max-width: 52ch; }
+  .cta-band__row { margin-top: 2rem; justify-content: center; }
+  .cta-band__mail {
+    display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem;
+    color: var(--on-ink-2); text-decoration: none; font-size: 0.92rem; word-break: break-all;
+  }
+  .cta-band__mail:hover { color: var(--brass-glow); }
+  .cta-band :global(.eyebrow) { justify-content: center; }
+</style>

@@ -1,0 +1,11 @@
+---
+import ServiceDetailView from '~/views/ServiceDetailView.astro';
+import { ko } from '~/i18n/ko';
+
+export function getStaticPaths() {
+  return ko.services.items.map((s) => ({ params: { slug: s.slug } }));
+}
+
+const { slug } = Astro.params;
+---
+<ServiceDetailView lang="ko" slug={slug!} />

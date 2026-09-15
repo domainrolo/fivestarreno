@@ -1,0 +1,311 @@
+---
+import Picture from '~/components/Picture.astro';
+import Icon from '~/components/Icon.astro';
+import { photos, type Category } from '~/data/images';
+import { t, href, type Lang } from '~/i18n';
+
+interface Props { lang: Lang; limit?: number; showViewAll?: boolean; tone?: 'paper' | 'paper2'; showHead?: boolean }
+const { lang, limit, showViewAll = false, tone = 'paper', showHead = true } = Astro.props;
+const d = t(lang);
+
+const order: Category[] = ['kitchen', 'bathroom', 'basement', 'whole-home', 'condo', 'exterior'];
+
+// Interleave categories so the default "everything" view is not six kitchens
+// followed by six bathrooms.
+const buckets = order.map((c) => photos.filter((p) => p.slug.startsWith('g-') && p.category === c));
+const woven: typeof photos = [];
+for (let i = 0; ; i++) {
+  const row = buckets.map((b) => b[i]).filter(Boolean);
+  if (!row.length) break;
+  woven.push(...row);
+}
+const shown = limit ? woven.slice(0, limit) : woven;
+
+const filters = [
+  { key: 'all', label: d.gallery.all },
+  ...order.map((c) => ({ key: c, label: d.gallery.filters[c] })),
+];
+---
+<section class:list={['section', tone === 'paper2' && 'section--paper2']} aria-labelledby="gal-h">
+  <div class="wrap">
+    {showHead ? (
+      <div class="gal__head reveal">
+        <div class="section-head" style="margin-bottom:0">
+          <p class="eyebrow">{d.gallery.eyebrow}</p>
+          <h2 class="h2" id="gal-h">{d.gallery.heading}</h2>
+          <p class="lead">{d.gallery.lead}</p>
+        </div>
+      </div>
+    ) : (
+      <h2 class="sr-only" id="gal-h">{d.gallery.heading}</h2>
+    )}
+
+    <div class="filters reveal" role="group" aria-label={d.gallery.heading}>
+      {filters.map((f) => (
+        <button
+          type="button"
+          class="filter"
+          data-filter={f.key}
+          aria-pressed={f.key === 'all' ? 'true' : 'false'}
+        >{f.label}</button>
+      ))}
+    </div>
+
+    <ul class="grid" id="gallery-grid">
+      {shown.map((p, i) => (
+        <li class="tile reveal" data-cat={p.category} style={`--reveal-delay:${Math.min(i, 8) * 55}ms`}>
+          <button type="button" class="tile__btn" data-index={i} data-slug={p.slug}>
+            <Picture
+              slug={p.slug}
+              lang={lang}
+              sizes="(min-width: 1200px) 30vw, (min-width: 760px) 45vw, 92vw"
+              class="tile__img"
+            />
+            <span class="tile__scrim"></span>
+            <span class="tile__tag">{p.category ? d.gallery.filters[p.category] : ''}</span>
+            <span class="tile__zoom" aria-hidden="true"><Icon name="sparkle" size={18} /></span>
+            <span class="sr-only">{p.alt[lang]}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+
+    <p class="gal__note reveal">{d.gallery.note}</p>
+
+    {showViewAll && (
+      <div class="gal__more reveal">
+        <a class="btn btn--ghost" href={href(lang, '/work')}>
+          {d.gallery.viewAll}<Icon name="arrow" size={18} />
+        </a>
+      </div>
+    )}
+  </div>
+</section>
+
+<dialog class="lightbox" id="lightbox" aria-label={d.gallery.lightbox.counter}>
+  <div class="lightbox__inner">
+    <img class="lightbox__img" id="lb-img" src="" alt="" />
+    <p class="lightbox__cap" id="lb-cap"></p>
+  </div>
+  <button type="button" class="lightbox__btn lightbox__close" id="lb-close">
+    <Icon name="close" size={22} /><span class="sr-only">{d.gallery.lightbox.close}</span>
+  </button>
+  <button type="button" class="lightbox__btn lightbox__prev" id="lb-prev">
+    <Icon name="chevron" size={24} /><span class="sr-only">{d.gallery.lightbox.prev}</span>
+  </button>
+  <button type="button" class="lightbox__btn lightbox__next" id="lb-next">
+    <Icon name="chevron" size={24} /><span class="sr-only">{d.gallery.lightbox.next}</span>
+  </button>
+  <p class="lightbox__count" id="lb-count" aria-live="polite"></p>
+</dialog>
+
+<script is:inline define:vars={{ items: shown.map((p) => ({ slug: p.slug, alt: p.alt[lang], w: p.widths[p.widths.length - 1] })) }}>
+  (() => {
+    const grid = document.getElementById('gallery-grid');
+    const dialog = document.getElementById('lightbox');
+    if (!grid || !dialog) return;
+
+    // ---- Filtering -------------------------------------------------------
+    const buttons = document.querySelectorAll('.filter');
+    const tiles = Array.from(grid.querySelectorAll('.tile'));
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const want = btn.getAttribute('data-filter');
+        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+        tiles.forEach((tile) => {
+          const match = want === 'all' || tile.getAttribute('data-cat') === want;
+          tile.classList.toggle('is-out', !match);
+          // Keep hidden tiles out of the tab order and the accessibility tree.
+          tile.toggleAttribute('inert', !match);
+        });
+      });
+    });
+
+    // ---- Lightbox --------------------------------------------------------
+    const img = document.getElementById('lb-img');
+    const cap = document.getElementById('lb-cap');
+    const count = document.getElementById('lb-count');
+    let index = 0;
+    let opener = null;
+
+    const visible = () => tiles.filter((t) => !t.classList.contains('is-out'));
+
+    const show = (i) => {
+      const list = visible();
+      if (!list.length) return;
+      const wrapped = (i + list.length) % list.length;
+      index = wrapped;
+      const tile = list[wrapped];
+      const slug = tile.querySelector('.tile__btn')?.getAttribute('data-slug');
+      const meta = items.find((it) => it.slug === slug);
+      if (!meta) return;
+      img.src = `/images/${meta.slug}-${meta.w}.jpg`;
+      img.alt = meta.alt;
+      cap.textContent = meta.alt;
+      count.textContent = `${wrapped + 1} / ${list.length}`;
+    };
+
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.tile__btn');
+      if (!btn) return;
+      opener = btn;
+      const list = visible();
+      const i = list.indexOf(btn.closest('.tile'));
+      show(i < 0 ? 0 : i);
+      if (typeof dialog.showModal === 'function') dialog.showModal();
+      else dialog.setAttribute('open', '');
+      document.body.style.overflow = 'hidden';
+    });
+
+    const close = () => {
+      if (typeof dialog.close === 'function') dialog.close();
+      else dialog.removeAttribute('open');
+    };
+
+    dialog.addEventListener('close', () => {
+      document.body.style.overflow = '';
+      img.src = '';
+      opener?.focus();
+    });
+
+    document.getElementById('lb-close').addEventListener('click', close);
+    document.getElementById('lb-next').addEventListener('click', () => show(index + 1));
+    document.getElementById('lb-prev').addEventListener('click', () => show(index - 1));
+
+    // Clicking the backdrop closes; clicking the photo itself does not.
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) close();
+    });
+
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); show(index + 1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); show(index - 1); }
+    });
+
+    // Swipe on touch.
+    let startX = 0;
+    dialog.addEventListener('touchstart', (e) => { startX = e.changedTouches[0].clientX; }, { passive: true });
+    dialog.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 50) show(index + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+  })();
+</script>
+
+<style>
+  .gal__head { margin-bottom: 1.75rem; }
+
+  .filters {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+  }
+  .filter {
+    min-height: 42px; padding: 0.5rem 1.05rem;
+    background: transparent; color: var(--text-2);
+    border: 1px solid var(--line); border-radius: 100px;
+    font-size: 0.86rem; font-weight: 600;
+    transition: background 0.24s var(--ease), color 0.24s var(--ease), border-color 0.24s var(--ease);
+  }
+  .filter:hover { border-color: var(--brass); color: var(--brass-ink); }
+  .filter[aria-pressed='true'] {
+    background: var(--ink); border-color: var(--ink); color: var(--on-ink);
+  }
+
+  .grid {
+    display: grid; gap: clamp(0.7rem, 1.6vw, 1.1rem);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  }
+
+  .tile {
+    transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+  }
+  .tile.is-out {
+    display: none;
+  }
+
+  .tile__btn {
+    position: relative; display: block; width: 100%; padding: 0;
+    aspect-ratio: 4 / 3; overflow: hidden;
+    background: var(--paper-3); border: 0; border-radius: var(--radius-lg);
+    cursor: zoom-in;
+  }
+  .tile__btn :global(.tile__img) { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s var(--ease); }
+  .tile__btn:hover :global(.tile__img),
+  .tile__btn:focus-visible :global(.tile__img) { transform: scale(1.07); }
+
+  .tile__scrim {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,14,18,.6), rgba(10,14,18,0) 52%);
+    opacity: 0; transition: opacity 0.35s var(--ease);
+  }
+  .tile__btn:hover .tile__scrim, .tile__btn:focus-visible .tile__scrim { opacity: 1; }
+
+  .tile__tag {
+    position: absolute; left: 0.85rem; bottom: 0.85rem;
+    color: #fff; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.02em;
+    text-shadow: 0 1px 6px rgba(0,0,0,.5);
+    opacity: 0; transform: translateY(6px);
+    transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+  }
+  .tile__zoom {
+    position: absolute; right: 0.85rem; top: 0.85rem;
+    display: grid; place-items: center; width: 34px; height: 34px;
+    border-radius: 50%; background: rgba(251,249,246,.92); color: var(--ink);
+    opacity: 0; transform: scale(.8);
+    transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+  }
+  .tile__btn:hover .tile__tag, .tile__btn:focus-visible .tile__tag { opacity: 1; transform: none; }
+  .tile__btn:hover .tile__zoom, .tile__btn:focus-visible .tile__zoom { opacity: 1; transform: none; }
+
+  .gal__note {
+    margin-top: 1.75rem; font-size: 0.83rem; color: var(--text-3); max-width: 62ch;
+  }
+  .gal__more { margin-top: 2rem; }
+
+  /* ---- Lightbox --------------------------------------------------------- */
+  .lightbox {
+    width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh;
+    padding: 0; border: 0; background: transparent; color: var(--on-ink);
+    overflow: hidden;
+  }
+  .lightbox::backdrop { background: rgba(8, 11, 14, 0.93); }
+  .lightbox[open] { display: grid; place-items: center; }
+  .lightbox__inner {
+    display: grid; gap: 0.9rem; place-items: center;
+    padding: 4.5rem 1rem 4rem; max-width: min(1400px, 100%);
+  }
+  .lightbox__img {
+    max-width: min(94vw, 1400px); max-height: 76dvh;
+    width: auto; height: auto; object-fit: contain;
+    border-radius: var(--radius); background: var(--ink-2);
+    animation: lb-in 0.34s var(--ease-out);
+  }
+  @keyframes lb-in { from { opacity: 0; transform: scale(.975); } to { opacity: 1; transform: none; } }
+  .lightbox__cap {
+    margin: 0; max-width: 72ch; text-align: center;
+    font-size: 0.88rem; color: rgba(251,249,246,.78);
+  }
+  .lightbox__count {
+    position: absolute; bottom: 1.1rem; left: 50%; translate: -50% 0; margin: 0;
+    font-size: 0.8rem; font-variant-numeric: tabular-nums; color: rgba(251,249,246,.62);
+  }
+
+  .lightbox__btn {
+    position: absolute; display: grid; place-items: center;
+    width: 48px; height: 48px; padding: 0;
+    background: rgba(251,249,246,.1); color: var(--on-ink);
+    border: 1px solid rgba(251,249,246,.2); border-radius: 50%;
+    transition: background 0.2s var(--ease), transform 0.2s var(--ease);
+  }
+  .lightbox__btn:hover { background: rgba(251,249,246,.22); }
+  .lightbox__close { top: 1rem; right: 1rem; }
+  .lightbox__prev { left: 0.75rem; top: 50%; translate: 0 -50%; }
+  .lightbox__next { right: 0.75rem; top: 50%; translate: 0 -50%; }
+  .lightbox__prev :global(svg) { transform: rotate(90deg); }
+  .lightbox__next :global(svg) { transform: rotate(-90deg); }
+  @media (min-width: 900px) {
+    .lightbox__prev { left: 1.75rem; }
+    .lightbox__next { right: 1.75rem; }
+  }
+</style>

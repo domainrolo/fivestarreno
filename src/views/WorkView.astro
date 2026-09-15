@@ -1,0 +1,24 @@
+---
+import Base from '~/layouts/Base.astro';
+import PageHead from '~/components/PageHead.astro';
+import Gallery from '~/sections/Gallery.astro';
+import Stats from '~/sections/Stats.astro';
+import CtaBand from '~/sections/CtaBand.astro';
+import { t, type Lang } from '~/i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+---
+<Base lang={lang} path="/work" title={d.pages.work.title} description={d.pages.work.description}>
+  <PageHead
+    lang={lang}
+    eyebrow={d.pages.work.eyebrow}
+    heading={d.pages.work.heading}
+    lead={d.pages.work.lead}
+    photo="band-openplan"
+  />
+  <Gallery lang={lang} showHead={false} />
+  <Stats lang={lang} />
+  <CtaBand lang={lang} />
+</Base>

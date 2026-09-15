@@ -1,0 +1,72 @@
+---
+import Icon from '~/components/Icon.astro';
+import Picture from '~/components/Picture.astro';
+import { t, type Lang } from '~/i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+const icons = ['shield', 'layers', 'phone', 'globe'];
+---
+<section class="section why" aria-labelledby="why-h">
+  <div class="wrap why__grid">
+    <div class="why__left">
+      <div class="section-head reveal" style="margin-bottom:0">
+        <p class="eyebrow">{d.why.eyebrow}</p>
+        <h2 class="h2" id="why-h">{d.why.heading}</h2>
+      </div>
+      <div class="why__photo reveal">
+        <Picture
+          slug="work-plans"
+          lang={lang}
+          sizes="(min-width: 1000px) 38vw, 92vw"
+          class="why__img"
+        />
+      </div>
+    </div>
+
+    <ul class="why__list">
+      {d.why.items.map((it, i) => (
+        <li class="why__item reveal" style={`--reveal-delay:${i * 80}ms`}>
+          <span class="why__icon"><Icon name={icons[i] ?? 'check'} size={19} /></span>
+          <div>
+            <h3 class="h4 why__t">{it.title}</h3>
+            <p class="why__p">{it.body}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .why__grid {
+    display: grid; gap: clamp(2.25rem, 5vw, 4rem);
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  @media (min-width: 1000px) { .why__grid { grid-template-columns: 0.85fr 1fr; } }
+
+  .why__left { position: sticky; top: 7rem; display: grid; gap: 2rem; }
+  @media (max-width: 999px) { .why__left { position: static; } }
+
+  .why__photo { border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4 / 3; }
+  @media (max-width: 999px) { .why__photo { display: none; } }
+  .why__photo :global(.why__img) { width: 100%; height: 100%; object-fit: cover; }
+
+  .why__list { display: grid; gap: 1px; background: var(--line-2); }
+  .why__item {
+    background: var(--paper);
+    display: flex; gap: 1.1rem; align-items: flex-start;
+    padding: clamp(1.4rem, 3vw, 2rem) 0;
+  }
+  .why__item:first-child { padding-top: 0; }
+
+  .why__icon {
+    display: grid; place-items: center; flex: none;
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--brass-wash); color: var(--brass-ink);
+  }
+  .why__t { margin-bottom: 0.45rem; }
+  .why__p { margin: 0; color: var(--text-2); font-size: 0.95rem; line-height: 1.7; max-width: 58ch; }
+</style>

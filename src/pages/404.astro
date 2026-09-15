@@ -1,0 +1,29 @@
+---
+import Base from '~/layouts/Base.astro';
+import Icon from '~/components/Icon.astro';
+import { t, href } from '~/i18n';
+const d = t('en');
+const k = t('ko');
+---
+<Base lang="en" path="/404" title={d.pages.notFound.title} description={d.pages.notFound.lead}>
+  <section class="section nf">
+    <div class="wrap nf__inner">
+      <p class="eyebrow">404</p>
+      <h1 class="h1">{d.pages.notFound.heading}</h1>
+      <p class="lead">{d.pages.notFound.lead}</p>
+      <p class="lead nf__ko" lang="ko">{k.pages.notFound.lead}</p>
+      <div class="btn-row nf__row">
+        <a class="btn" href={href('en', '/')}>{d.pages.notFound.home}<Icon name="arrow" size={18} /></a>
+        <a class="btn btn--ghost" href={href('en', '/services')}>{d.nav.services}</a>
+        <a class="btn btn--ghost" href={href('ko', '/')} lang="ko">한국어</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf { min-height: 62svh; display: grid; align-items: center; }
+  .nf__inner { max-width: 44rem; }
+  .nf__ko { margin-top: 0.4rem; font-size: 0.98rem; }
+  .nf__row { margin-top: 2rem; }
+</style>

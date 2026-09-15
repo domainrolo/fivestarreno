@@ -1,0 +1,28 @@
+---
+import Base from '~/layouts/Base.astro';
+import PageHead from '~/components/PageHead.astro';
+import Services from '~/sections/Services.astro';
+import Process from '~/sections/Process.astro';
+import Costs from '~/sections/Costs.astro';
+import Faq from '~/sections/Faq.astro';
+import CtaBand from '~/sections/CtaBand.astro';
+import { t, type Lang } from '~/i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+---
+<Base lang={lang} path="/services" title={d.pages.services.title} description={d.pages.services.description}>
+  <PageHead
+    lang={lang}
+    eyebrow={d.pages.services.eyebrow}
+    heading={d.pages.services.heading}
+    lead={d.pages.services.lead}
+    photo="svc-wholehome"
+  />
+  <Services lang={lang} showHead={false} />
+  <Process lang={lang} />
+  <Costs lang={lang} />
+  <Faq lang={lang} />
+  <CtaBand lang={lang} />
+</Base>

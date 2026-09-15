@@ -1,0 +1,79 @@
+---
+import { t, type Lang } from '~/i18n';
+import { site } from '~/data/site';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+
+type Stat = { value: string; countTo?: number; suffix?: string; label: string; note?: string };
+const stats: Stat[] = [];
+
+if (site.yearsInBusiness) {
+  stats.push({ value: `${site.yearsInBusiness}`, countTo: site.yearsInBusiness, suffix: '+', label: d.stats.years });
+}
+if (site.projectsCompleted) {
+  stats.push({ value: `${site.projectsCompleted}`, countTo: site.projectsCompleted, suffix: '+', label: d.stats.projects });
+}
+if (site.warrantyYears) {
+  stats.push({
+    value: `${site.warrantyYears}`,
+    countTo: site.warrantyYears,
+    label: site.warrantyYears === 1 ? d.stats.warranty : d.stats.warrantyPlural,
+  });
+}
+stats.push({ value: '1', countTo: 1, label: d.stats.response });
+stats.push({ value: '2', countTo: 2, label: d.stats.languages, note: d.stats.languagesNote });
+stats.push({ value: d.stats.freeValue, label: d.stats.free });
+---
+<section class="section section--tight stats-sec section--ink grain" aria-labelledby="stats-h">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">{d.stats.eyebrow}</p>
+      <h2 class="h2" id="stats-h">{d.stats.heading}</h2>
+    </div>
+    <dl class="stats">
+      {stats.map((s, i) => (
+        <div class="stat reveal" style={`--reveal-delay:${i * 80}ms`}>
+          <dt class="stat__v">
+            {/* The real value is in the markup, so it is correct with JS off
+                and correct for crawlers. The counter only animates from zero
+                when the number is big enough for the effect to read. */}
+            {s.countTo !== undefined
+              ? <span data-count-to={s.countTo} data-count-suffix={s.suffix ?? ''}>{s.value}{s.suffix ?? ''}</span>
+              : <span>{s.value}</span>}
+          </dt>
+          <dd class="stat__l">
+            {s.label}
+            {s.note && <span class="stat__note">{s.note}</span>}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<style>
+  .stats-sec { position: relative; isolation: isolate; }
+  .stats {
+    display: grid; gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    background: var(--line-ink);
+    border: 1px solid var(--line-ink);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin: 0;
+  }
+  .stat { background: var(--ink); padding: clamp(1.5rem, 3vw, 2.25rem) 1.4rem; }
+  .stat__v {
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 5.5vw, 3.6rem); font-weight: 700; line-height: 1;
+    letter-spacing: -0.03em; color: var(--brass-glow);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat__l {
+    margin: 0.7rem 0 0; color: var(--on-ink-2);
+    font-size: 0.88rem; line-height: 1.5;
+  }
+  .stat__note { display: block; color: var(--on-ink-3); font-size: 0.82rem; margin-top: 0.15rem; }
+</style>

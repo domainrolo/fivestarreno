@@ -1,0 +1,11 @@
+---
+import ServiceDetailView from '~/views/ServiceDetailView.astro';
+import { en } from '~/i18n/en';
+
+export function getStaticPaths() {
+  return en.services.items.map((s) => ({ params: { slug: s.slug } }));
+}
+
+const { slug } = Astro.params;
+---
+<ServiceDetailView lang="en" slug={slug!} />

@@ -1,0 +1,127 @@
+---
+import Picture from '~/components/Picture.astro';
+import Icon from '~/components/Icon.astro';
+import { t, href, type Lang } from '~/i18n';
+import { site } from '~/data/site';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+---
+<section class="hero on-ink grain" aria-labelledby="hero-h">
+  <div class="hero__media">
+    <Picture slug="hero-living" lang={lang} priority sizes="100vw" class="hero__img kenburns" alt="" />
+  </div>
+  <div class="hero__scrim"></div>
+
+  <div class="wrap-wide hero__inner">
+    <p class="eyebrow hero__eyebrow">{d.hero.eyebrow}</p>
+    <h1 class="h-display hero__h" id="hero-h">
+      <span class="hero__line"><span>{d.hero.h1a}</span></span>
+      <span class="hero__line"><span class="hero__accent">{d.hero.h1b}</span></span>
+    </h1>
+    <p class="lead hero__lead">{d.hero.lead}</p>
+    <div class="btn-row hero__cta">
+      <a class="btn" href={href(lang, '/contact')}>
+        {d.cta.primary}<Icon name="arrow" size={18} />
+      </a>
+      <a class="btn btn--ghost" href={href(lang, '/work')}>{d.cta.secondary}</a>
+    </div>
+    <a class="hero__phone" href={site.phoneHref}>
+      <Icon name="phone" size={17} />
+      <span>{site.phone}</span>
+    </a>
+  </div>
+
+  <a class="hero__scroll" href="#trust" aria-label={d.hero.scroll}>
+    <span class="hero__scrolltrack"><span class="hero__scrolldot"></span></span>
+  </a>
+</section>
+
+<style>
+  .hero {
+    position: relative; isolation: isolate;
+    min-height: min(92svh, 860px);
+    display: flex; align-items: flex-end;
+    padding: 9rem 0 clamp(3rem, 7vw, 5.5rem);
+    background: var(--ink); color: var(--on-ink);
+    overflow: hidden;
+  }
+  @media (min-width: 900px) { .hero { min-height: min(94svh, 940px); } }
+
+  .hero__media { position: absolute; inset: 0; z-index: -2; }
+  .hero__media :global(.hero__img) { width: 100%; height: 100%; object-fit: cover; object-position: center 55%; }
+
+  .hero__media :global(.kenburns) { animation: kb 26s ease-in-out infinite alternate; transform-origin: 52% 55%; }
+  @keyframes kb { from { transform: scale(1.02); } to { transform: scale(1.13); } }
+
+  .hero__scrim {
+    position: absolute; inset: 0; z-index: -1;
+    background:
+      linear-gradient(to top, rgba(10,14,18,.94) 0%, rgba(10,14,18,.80) 26%, rgba(10,14,18,.42) 58%, rgba(10,14,18,.52) 100%),
+      linear-gradient(to right, rgba(10,14,18,.66) 0%, rgba(10,14,18,.12) 62%);
+  }
+
+  .hero__inner { position: relative; z-index: 2; max-width: 62rem; }
+
+  .hero__eyebrow { color: var(--brass-glow); }
+  .hero__eyebrow::before { background: var(--brass-glow); }
+
+  .hero__h { color: #fff; margin: 0 0 1.4rem; }
+  .hero__line { display: block; overflow: hidden; }
+  .hero__line > span {
+    display: block;
+    animation: rise 0.95s var(--ease-out) backwards;
+  }
+  .hero__line:nth-child(1) > span { animation-delay: 0.08s; }
+  .hero__line:nth-child(2) > span { animation-delay: 0.2s; }
+  @keyframes rise { from { transform: translateY(105%); } to { transform: none; } }
+
+  .hero__accent {
+    color: var(--brass-glow);
+    font-style: italic;
+  }
+  :global(html[lang^='ko']) .hero__accent { font-style: normal; }
+
+  .hero__lead {
+    color: rgba(251,249,246,.9); max-width: 46ch;
+    animation: fade 0.9s var(--ease-out) 0.42s backwards;
+  }
+  .hero__cta { margin-top: 2rem; animation: fade 0.9s var(--ease-out) 0.54s backwards; }
+  @keyframes fade { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  .hero__phone {
+    display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem;
+    color: var(--on-ink); text-decoration: none;
+    font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums;
+    animation: fade 0.9s var(--ease-out) 0.64s backwards;
+  }
+  .hero__phone:hover { color: var(--brass-glow); }
+  @media (min-width: 721px) { .hero__phone { display: none; } }
+
+  .hero__scroll {
+    position: absolute; z-index: 2; bottom: 1.6rem; left: 50%; translate: -50% 0;
+    display: none; padding: 0.5rem;
+  }
+  @media (min-width: 900px) { .hero__scroll { display: block; } }
+  .hero__scrolltrack {
+    display: block; width: 22px; height: 36px;
+    border: 1.5px solid rgba(251,249,246,.5); border-radius: 12px;
+    position: relative;
+  }
+  .hero__scrolldot {
+    position: absolute; left: 50%; top: 7px; translate: -50% 0;
+    width: 3px; height: 7px; border-radius: 2px; background: var(--brass-glow);
+    animation: scrolldot 1.9s var(--ease) infinite;
+  }
+  @keyframes scrolldot {
+    0%, 12% { transform: translateY(0); opacity: 1; }
+    62% { transform: translateY(13px); opacity: 0; }
+    63%, 100% { transform: translateY(0); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__line > span, .hero__lead, .hero__cta, .hero__phone { animation: none !important; }
+    .hero__scrolldot { animation: none !important; }
+  }
+</style>

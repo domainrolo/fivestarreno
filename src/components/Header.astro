@@ -1,0 +1,267 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { t, href, otherLang, type Lang } from '~/i18n';
+import { site } from '~/data/site';
+
+interface Props { lang: Lang; path: string; transparent?: boolean }
+const { lang, path, transparent = false } = Astro.props;
+const d = t(lang);
+const other = otherLang(lang);
+
+const links = [
+  { label: d.nav.services, to: '/services' },
+  { label: d.nav.work, to: '/work' },
+  { label: d.nav.about, to: '/about' },
+  { label: d.nav.contact, to: '/contact' },
+];
+---
+<header class:list={['site-header', transparent && 'site-header--over']} data-transparent={transparent}>
+  <div class="wrap-wide bar">
+    <a class="brand" href={href(lang, '/')}>
+      <Logo />
+      <span class="sr-only">{site.name} — {d.nav.home}</span>
+    </a>
+
+    <nav class="nav" aria-label={d.nav.menu}>
+      {links.map((l) => (
+        <a
+          class:list={['nav__link', path === l.to && 'is-current']}
+          href={href(lang, l.to)}
+          aria-current={path === l.to ? 'page' : undefined}
+        >{l.label}</a>
+      ))}
+    </nav>
+
+    <div class="tools">
+      <a class="lang" href={href(other, path)} lang={other === 'ko' ? 'ko' : 'en'} hreflang={other === 'ko' ? 'ko-CA' : 'en-CA'}>
+        <Icon name="globe" size={16} />
+        <span>{d.otherLabel}</span>
+      </a>
+      <a class="phone" href={site.phoneHref}>
+        <Icon name="phone" size={16} />
+        <span>{site.phone}</span>
+      </a>
+      <a class="btn btn--ink cta" href={href(lang, '/contact')}>{d.cta.primary}</a>
+      <button class="burger" type="button" aria-expanded="false" aria-controls="mobile-nav">
+        <Icon name="menu" size={22} class="burger__open" />
+        <Icon name="close" size={22} class="burger__close" />
+        <span class="sr-only">{d.nav.menu}</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="mnav" id="mobile-nav" hidden>
+  <div class="mnav__inner">
+    <a class="btn mnav__cta" href={href(lang, '/contact')}>{d.cta.primary}</a>
+    <nav aria-label={d.nav.menu}>
+      <ul class="mnav__list">
+        <li><a href={href(lang, '/')}>{d.nav.home}</a></li>
+        {links.map((l) => <li><a href={href(lang, l.to)}>{l.label}</a></li>)}
+      </ul>
+    </nav>
+    <div class="mnav__foot">
+      <a class="mnav__phone" href={site.phoneHref}>
+        <Icon name="phone" size={18} /><span>{site.phone}</span>
+      </a>
+      <a class="mnav__lang" href={href(other, path)} lang={other === 'ko' ? 'ko' : 'en'}>
+        <Icon name="globe" size={16} /><span>{d.otherLabel}</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .site-header {
+    position: sticky; top: 0; z-index: 60;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line-2);
+    transition: background 0.3s var(--ease), border-color 0.3s var(--ease),
+                box-shadow 0.3s var(--ease), backdrop-filter 0.3s var(--ease);
+  }
+  .site-header--over {
+    position: fixed; inset-inline: 0; top: 0;
+    background: transparent; border-bottom-color: transparent;
+  }
+  .site-header--over :global(.logo__text) { color: var(--on-ink) !important; }
+  .site-header--over .nav__link,
+  .site-header--over .phone,
+  .site-header--over .lang { color: var(--on-ink); }
+  .site-header--over .lang { border-color: var(--line-ink); }
+  .site-header--over .btn--ink {
+    --btn-bg: var(--on-ink); --btn-bd: var(--on-ink); --btn-fg: var(--ink);
+  }
+  .site-header--over .btn--ink:hover { --btn-bg: var(--brass); --btn-bd: var(--brass); --btn-fg: #fff; }
+  .site-header--over .burger { color: var(--on-ink); }
+
+  .site-header.is-stuck {
+    background: rgba(251, 249, 246, 0.88);
+    -webkit-backdrop-filter: saturate(1.5) blur(14px);
+    backdrop-filter: saturate(1.5) blur(14px);
+    border-bottom-color: var(--line-2);
+    box-shadow: 0 1px 24px rgba(18, 23, 28, 0.07);
+  }
+  .site-header--over.is-stuck :global(.logo__text) { color: var(--text) !important; }
+  .site-header--over.is-stuck .nav__link,
+  .site-header--over.is-stuck .phone,
+  .site-header--over.is-stuck .lang,
+  .site-header--over.is-stuck .burger { color: var(--text); }
+  .site-header--over.is-stuck .lang { border-color: var(--line); }
+  .site-header--over.is-stuck .btn--ink { --btn-bg: var(--ink); --btn-bd: var(--ink); --btn-fg: #fff; }
+
+  /* While the drawer is open the header sits on top of it, so it has to
+     read as part of that dark panel rather than a white strip above it. */
+  .site-header.is-navopen {
+    background: transparent;
+    border-bottom-color: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .site-header.is-navopen :global(.logo__text) { color: var(--on-ink) !important; }
+  .site-header.is-navopen .burger { color: var(--on-ink); border-color: var(--line-ink); }
+  .site-header.is-navopen .phone { color: var(--on-ink); }
+  .site-header.is-navopen .lang { display: none; }
+
+  .bar {
+    display: flex; align-items: center; gap: 1.25rem;
+    min-height: 72px; padding-block: 0.7rem;
+  }
+  @media (min-width: 900px) { .bar { min-height: 84px; } }
+
+  .brand { margin-inline-end: auto; text-decoration: none; display: inline-flex; }
+
+  .nav { display: none; gap: 0.35rem; }
+  @media (min-width: 1000px) { .nav { display: flex; } }
+  .nav__link {
+    position: relative; padding: 0.55rem 0.9rem; border-radius: var(--radius);
+    color: var(--text); text-decoration: none;
+    font-size: 0.93rem; font-weight: 500;
+    transition: color 0.2s var(--ease);
+  }
+  .nav__link::after {
+    content: ''; position: absolute; left: 0.9rem; right: 0.9rem; bottom: 0.3rem;
+    height: 1.5px; background: var(--brass);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.32s var(--ease);
+  }
+  .nav__link:hover::after, .nav__link.is-current::after { transform: scaleX(1); }
+
+  .tools { display: flex; align-items: center; gap: 0.6rem; }
+
+  .lang {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.5rem 0.75rem; min-height: 40px;
+    border: 1px solid var(--line); border-radius: var(--radius);
+    color: var(--text); text-decoration: none;
+    font-size: 0.83rem; font-weight: 600;
+    transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
+  }
+  .lang:hover { background: var(--paper-2); border-color: var(--brass); color: var(--text); }
+  .site-header--over .lang:hover { background: rgba(255,255,255,.14); }
+
+  .phone {
+    display: none; align-items: center; gap: 0.45rem;
+    color: var(--text); text-decoration: none;
+    font-size: 0.93rem; font-weight: 600; font-variant-numeric: tabular-nums;
+    padding: 0.5rem 0.4rem;
+  }
+  .phone:hover { color: var(--brass-ink); }
+  @media (min-width: 640px) { .phone { display: inline-flex; } }
+
+  .cta { display: none; }
+  @media (min-width: 1000px) { .cta { display: inline-flex; } }
+
+  .burger {
+    display: inline-grid; place-items: center;
+    width: 44px; height: 44px; padding: 0;
+    background: none; border: 1px solid var(--line); border-radius: var(--radius);
+    color: var(--text);
+  }
+  @media (min-width: 1000px) { .burger { display: none; } }
+  .burger :global(.burger__close) { display: none; }
+  .burger[aria-expanded='true'] :global(.burger__open) { display: none; }
+  .burger[aria-expanded='true'] :global(.burger__close) { display: block; }
+
+  /* Mobile drawer */
+  .mnav {
+    position: fixed; inset: 0; z-index: 55;
+    background: var(--ink); color: var(--on-ink);
+    padding: 88px var(--gutter) 2rem;
+    overflow-y: auto;
+    animation: mnav-in 0.34s var(--ease-out);
+  }
+  @keyframes mnav-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+  .mnav__inner { display: flex; flex-direction: column; gap: 1.75rem; min-height: 100%; }
+  .mnav__cta { width: 100%; font-size: 1.02rem; padding-block: 1.05rem; }
+  .mnav__list { display: flex; flex-direction: column; }
+  .mnav__list li { border-bottom: 1px solid var(--line-ink); }
+  .mnav__list a {
+    display: block; padding: 1.05rem 0;
+    color: var(--on-ink); text-decoration: none;
+    font-family: var(--font-display); font-size: 1.65rem; font-weight: 600;
+    letter-spacing: -0.02em;
+    transition: color 0.2s var(--ease), padding-inline-start 0.24s var(--ease);
+  }
+  :global(html[lang^='ko']) .mnav__list a { font-size: 1.35rem; font-weight: 700; }
+  .mnav__list a:hover { color: var(--brass-glow); padding-inline-start: 0.5rem; }
+  .mnav__foot {
+    margin-top: auto; padding-top: 1.5rem;
+    display: flex; flex-wrap: wrap; gap: 0.85rem; justify-content: space-between; align-items: center;
+  }
+  .mnav__phone {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    color: var(--brass-glow); text-decoration: none;
+    font-size: 1.2rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  }
+  .mnav__lang {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    padding: 0.6rem 0.95rem; min-height: 44px;
+    border: 1px solid var(--line-ink); border-radius: var(--radius);
+    color: var(--on-ink); text-decoration: none; font-size: 0.9rem; font-weight: 600;
+  }
+  .mnav__lang:hover { background: rgba(255,255,255,.1); color: var(--on-ink); }
+</style>
+
+<script>
+  const burger = document.querySelector<HTMLButtonElement>('.burger');
+  const drawer = document.querySelector<HTMLElement>('.mnav');
+
+  if (burger && drawer) {
+    const focusables = () =>
+      Array.from(drawer.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'));
+
+    const setOpen = (open: boolean) => {
+      burger.setAttribute('aria-expanded', String(open));
+      drawer.hidden = !open;
+      document.querySelector('.site-header')?.classList.toggle('is-navopen', open);
+      document.body.style.overflow = open ? 'hidden' : '';
+      if (open) focusables()[0]?.focus();
+      else burger.focus();
+    };
+
+    burger.addEventListener('click', () => setOpen(drawer.hidden));
+
+    drawer.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) setOpen(false);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (drawer.hidden) return;
+      if (e.key === 'Escape') { setOpen(false); return; }
+      if (e.key !== 'Tab') return;
+      const items = focusables();
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+
+    // A resize into desktop layout should not leave the drawer stuck open.
+    window.matchMedia('(min-width: 1000px)').addEventListener('change', (ev) => {
+      if (ev.matches && !drawer.hidden) setOpen(false);
+    });
+  }
+</script>

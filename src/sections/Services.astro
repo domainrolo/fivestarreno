@@ -1,0 +1,102 @@
+---
+import Picture from '~/components/Picture.astro';
+import Icon from '~/components/Icon.astro';
+import { t, href, type Lang } from '~/i18n';
+
+interface Props { lang: Lang; limit?: number; showHead?: boolean }
+const { lang, limit, showHead = true } = Astro.props;
+const d = t(lang);
+const items = limit ? d.services.items.slice(0, limit) : d.services.items;
+---
+<section class="section" aria-labelledby="svc-h">
+  <div class="wrap">
+    {showHead && (
+      <div class="section-head reveal">
+        <p class="eyebrow">{d.services.eyebrow}</p>
+        <h2 class="h2" id="svc-h">{d.services.heading}</h2>
+        <p class="lead">{d.services.lead}</p>
+      </div>
+    )}
+
+    <ul class="cards">
+      {items.map((s, i) => (
+        <li class="card reveal" style={`--reveal-delay:${Math.min(i, 5) * 70}ms`}>
+          <a class="card__link" href={href(lang, `/services/${s.slug}`)}>
+            <span class="card__media">
+              <Picture
+                slug={s.photo}
+                lang={lang}
+                sizes="(min-width: 1100px) 30vw, (min-width: 700px) 45vw, 92vw"
+                class="card__img"
+              />
+              <span class="card__num">{String(i + 1).padStart(2, '0')}</span>
+            </span>
+            <span class="card__body">
+              <span class="h4 card__title">{s.title}</span>
+              <span class="card__blurb">{s.blurb}</span>
+              <span class="card__foot">
+                <span class="card__time">{d.services.typical}: {s.duration}</span>
+                <span class="card__cta">{d.services.learnMore}<Icon name="arrow" size={16} /></span>
+              </span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .cards {
+    display: grid; gap: clamp(1.1rem, 2.2vw, 1.75rem);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  }
+
+  .card { display: flex; }
+  .card__link {
+    display: flex; flex-direction: column; width: 100%;
+    background: var(--paper); color: var(--text); text-decoration: none;
+    border: 1px solid var(--line); border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: transform 0.38s var(--ease), box-shadow 0.38s var(--ease), border-color 0.38s var(--ease);
+  }
+  .card__link:hover, .card__link:focus-visible {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+    border-color: transparent;
+    color: var(--text);
+  }
+
+  .card__media { position: relative; display: block; overflow: hidden; aspect-ratio: 4 / 3; background: var(--paper-3); }
+  .card__media :global(.card__img) { width: 100%; height: 100%; object-fit: cover; transition: transform 0.75s var(--ease); }
+  .card__link:hover :global(.card__img),
+  .card__link:focus-visible :global(.card__img) { transform: scale(1.06); }
+
+  .card__num {
+    position: absolute; left: 0; bottom: 0;
+    background: var(--ink); color: var(--brass-glow);
+    font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+    padding: 0.35rem 0.7rem;
+    border-start-end-radius: var(--radius);
+  }
+
+  .card__body {
+    display: flex; flex-direction: column; flex: 1;
+    gap: 0.55rem; padding: 1.3rem 1.35rem 1.4rem;
+  }
+  .card__title { color: var(--text); }
+  .card__blurb { color: var(--text-2); font-size: 0.93rem; line-height: 1.6; }
+
+  .card__foot {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 0.6rem; margin-top: auto; padding-top: 1rem;
+    border-top: 1px solid var(--line-2);
+  }
+  .card__time { font-size: 0.78rem; color: var(--text-3); letter-spacing: 0.01em; }
+  .card__cta {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-size: 0.84rem; font-weight: 600; color: var(--brass-ink);
+  }
+  .card__cta :global(svg) { transition: transform 0.3s var(--ease); }
+  .card__link:hover .card__cta :global(svg) { transform: translateX(4px); }
+</style>

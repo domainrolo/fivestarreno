@@ -1,0 +1,60 @@
+---
+import Icon from '~/components/Icon.astro';
+import { t, type Lang } from '~/i18n';
+import { site } from '~/data/site';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+
+/**
+ * Hidden entirely until real reviews are added to site.testimonials.
+ * Invented reviews are worse than none: homeowners check, and a made-up
+ * name attached to a made-up neighbourhood is the fastest way to lose a job.
+ */
+const list = site.testimonials;
+---
+{list.length >= 2 && (
+  <section class="section section--paper2" aria-labelledby="tst-h">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">{d.gallery.eyebrow}</p>
+        <h2 class="h2" id="tst-h">{d.why.heading}</h2>
+      </div>
+      <ul class="tst">
+        {list.map((r, i) => (
+          <li class="tst__item reveal" style={`--reveal-delay:${i * 80}ms`}>
+            <p class="tst__stars" aria-label="5 / 5">
+              {[0, 1, 2, 3, 4].map(() => <Icon name="star" size={16} />)}
+            </p>
+            <blockquote class="tst__q">
+              <p>{lang === 'ko' && r.quoteKo ? r.quoteKo : r.quote}</p>
+            </blockquote>
+            <p class="tst__by">
+              <span class="tst__name">{r.name}</span>
+              <span class="tst__place">{r.place}{r.source ? ` · ${r.source}` : ''}</span>
+            </p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+)}
+
+<style>
+  .tst {
+    display: grid; gap: clamp(1rem, 2vw, 1.5rem);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  }
+  .tst__item {
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); padding: 1.6rem;
+    display: flex; flex-direction: column; gap: 0.9rem;
+  }
+  .tst__stars { display: flex; gap: 2px; margin: 0; color: var(--brass); }
+  .tst__q { margin: 0; }
+  .tst__q p { margin: 0; font-size: 1rem; line-height: 1.68; color: var(--text); }
+  .tst__by { margin: auto 0 0; display: flex; flex-direction: column; gap: 0.15rem; }
+  .tst__name { font-weight: 600; font-size: 0.92rem; }
+  .tst__place { font-size: 0.83rem; color: var(--text-3); }
+</style>

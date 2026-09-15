@@ -1,0 +1,213 @@
+---
+import '~/styles/global.css';
+import Header from '~/components/Header.astro';
+import Footer from '~/components/Footer.astro';
+import CallBar from '~/components/CallBar.astro';
+import { t, href, otherLang, type Lang } from '~/i18n';
+import { site } from '~/data/site';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  /** Canonical English path, e.g. '/services'. Used for hreflang pairing. */
+  path: string;
+  ogImage?: string;
+  /** Hero pages let the header sit over the image until the user scrolls. */
+  transparentHeader?: boolean;
+}
+
+const { lang, title, description, path, ogImage = '/images/hero-living-1600.jpg', transparentHeader = false } = Astro.props;
+const d = t(lang);
+const other = otherLang(lang);
+
+const fullTitle = title.includes(site.name) || title.includes(site.nameKo)
+  ? title
+  : `${title} | ${lang === 'ko' ? site.nameKo : site.name}`;
+
+const canonical = new URL(href(lang, path), site.url).href;
+const enUrl = new URL(href('en', path), site.url).href;
+const koUrl = new URL(href('ko', path), site.url).href;
+const ogUrl = new URL(ogImage, site.url).href;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'GeneralContractor',
+  name: site.name,
+  alternateName: site.nameKo,
+  url: site.url,
+  telephone: `+1-${site.phone}`,
+  email: site.email,
+  image: ogUrl,
+  description,
+  priceRange: '$$',
+  areaServed: { '@type': 'AdministrativeArea', name: 'Greater Toronto Area, Ontario, Canada' },
+  address: { '@type': 'PostalAddress', addressRegion: 'ON', addressCountry: 'CA' },
+  knowsLanguage: ['en-CA', 'ko-KR'],
+  ...(site.googleRating && site.googleReviewCount
+    ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: site.googleRating, reviewCount: site.googleReviewCount } }
+    : {}),
+};
+---
+<!doctype html>
+<html lang={d.htmlLang} class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en-CA" href={enUrl} />
+    <link rel="alternate" hreflang="ko-CA" href={koUrl} />
+    <link rel="alternate" hreflang="x-default" href={enUrl} />
+
+    <meta name="theme-color" content="#12171c" />
+    <meta name="format-detection" content="telephone=yes" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={lang === 'ko' ? site.nameKo : site.name} />
+    <meta property="og:locale" content={lang === 'ko' ? 'ko_CA' : 'en_CA'} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogUrl} />
+    <meta property="og:image:alt" content={d.meta.ogAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap"
+    />
+
+    <script is:inline>
+      document.documentElement.classList.remove('no-js');
+    </script>
+    <set:html value={`<script type="application/ld+json">${JSON.stringify(schema)}</script>`} />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">{d.nav.skip}</a>
+    <Header lang={lang} path={path} transparent={transparentHeader} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+    <CallBar lang={lang} />
+
+    <script>
+      // Scroll reveal.
+      //
+      // Deliberately not IntersectionObserver: when a fast scroll, an anchor
+      // jump or a restored scroll position takes an element straight from
+      // below the viewport to above it, its intersection ratio never changes
+      // from 0, so the callback never fires and the element is stuck at
+      // opacity 0 for the rest of the session. A rAF-throttled sweep over the
+      // pending set cannot miss, and the set empties as the page is read.
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const targets = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
+
+      if (reduced.matches) {
+        targets.forEach((el) => el.classList.add('is-in'));
+      } else {
+        const pending = new Set(targets);
+        let queued = false;
+
+        const sweep = () => {
+          queued = false;
+          const h = window.innerHeight;
+          for (const el of pending) {
+            const r = el.getBoundingClientRect();
+            const entered = r.top < h * 0.92;
+            const passed = r.bottom <= 0;
+            if (entered || passed) {
+              el.classList.add('is-in');
+              pending.delete(el);
+            }
+          }
+          if (!pending.size) {
+            window.removeEventListener('scroll', request);
+            window.removeEventListener('resize', request);
+          }
+        };
+
+        function request() {
+          if (queued) return;
+          queued = true;
+          requestAnimationFrame(sweep);
+        }
+
+        window.addEventListener('scroll', request, { passive: true });
+        window.addEventListener('resize', request, { passive: true });
+        sweep();
+        // Late-loading images can shift layout under an element that was just
+        // off screen, so take one more look once everything has settled.
+        window.addEventListener('load', request, { once: true });
+      }
+
+      // Header state: solid once the page scrolls past the hero lip.
+      const header = document.querySelector<HTMLElement>('.site-header');
+      if (header) {
+        let ticking = false;
+        const update = () => {
+          header.classList.toggle('is-stuck', window.scrollY > 24);
+          ticking = false;
+        };
+        update();
+        window.addEventListener(
+          'scroll',
+          () => {
+            if (!ticking) {
+              ticking = true;
+              requestAnimationFrame(update);
+            }
+          },
+          { passive: true }
+        );
+      }
+
+      // Counters in the stats band.
+      const counters = document.querySelectorAll<HTMLElement>('[data-count-to]');
+      if (counters.length) {
+        const run = (el: HTMLElement) => {
+          const to = Number(el.dataset.countTo);
+          const suffix = el.dataset.countSuffix ?? '';
+          if (!Number.isFinite(to)) return;
+          // Counting 0 -> 2 looks broken rather than lively, and a warranty
+          // that reads "0 years" for a second is worse than no animation.
+          if (reduced.matches || to < 10) {
+            el.textContent = `${to}${suffix}`;
+            return;
+          }
+          const dur = 1100;
+          const start = performance.now();
+          const tick = (now: number) => {
+            const p = Math.min(1, (now - start) / dur);
+            const eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = `${Math.round(to * eased)}${suffix}`;
+            if (p < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        };
+        const cio = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                run(e.target as HTMLElement);
+                cio.unobserve(e.target);
+              }
+            }
+          },
+          { threshold: 0.5 }
+        );
+        counters.forEach((el) => cio.observe(el));
+      }
+    </script>
+  </body>
+</html>

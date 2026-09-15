@@ -1,0 +1,10 @@
+{
+  "name": "Five Star Reno",
+  "short_name": "Five Star",
+  "description": "General contractor in Toronto and the GTA.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf9f6",
+  "theme_color": "#12171c",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

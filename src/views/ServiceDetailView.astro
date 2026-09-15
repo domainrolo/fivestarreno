@@ -1,0 +1,182 @@
+---
+import Base from '~/layouts/Base.astro';
+import Picture from '~/components/Picture.astro';
+import Icon from '~/components/Icon.astro';
+import Gallery from '~/sections/Gallery.astro';
+import Faq from '~/sections/Faq.astro';
+import CtaBand from '~/sections/CtaBand.astro';
+import { t, href, type Lang } from '~/i18n';
+import { site } from '~/data/site';
+
+interface Props { lang: Lang; slug: string }
+const { lang, slug } = Astro.props;
+const d = t(lang);
+
+const idx = d.services.items.findIndex((s) => s.slug === slug);
+if (idx < 0) throw new Error(`Unknown service slug: ${slug}`);
+const s = d.services.items[idx];
+const others = d.services.items.filter((o) => o.slug !== slug).slice(0, 3);
+---
+<Base
+  lang={lang}
+  path={`/services/${slug}`}
+  title={`${s.title} | ${lang === 'ko' ? site.nameKo : site.name}`}
+  description={s.blurb}
+  ogImage={`/images/${s.photo}-1280.jpg`}
+>
+  <section class="sd-hero on-ink grain">
+    <div class="sd-hero__media" aria-hidden="true">
+      <Picture slug={s.photo} lang={lang} sizes="100vw" class="sd-hero__img" priority alt="" />
+    </div>
+    <div class="wrap sd-hero__inner">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <ol>
+          <li><a href={href(lang, '/')}>{d.nav.home}</a></li>
+          <li><a href={href(lang, '/services')}>{d.nav.services}</a></li>
+          <li aria-current="page">{s.title}</li>
+        </ol>
+      </nav>
+      <p class="eyebrow">{d.services.eyebrow}</p>
+      <h1 class="h1 sd-hero__h">{s.title}</h1>
+      <p class="lead sd-hero__lead">{s.blurb}</p>
+      <p class="sd-hero__time">
+        <Icon name="clock" size={16} />{d.services.typical}: <strong>{s.duration}</strong>
+      </p>
+      <div class="btn-row sd-hero__row">
+        <a class="btn" href={href(lang, '/contact')}>{d.cta.primary}<Icon name="arrow" size={18} /></a>
+        <a class="btn btn--ghost" href={site.phoneHref}><Icon name="phone" size={17} />{site.phone}</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section sd">
+    <div class="wrap sd__grid">
+      <div class="sd__main reveal">
+        <p class="sd__long">{s.long}</p>
+        <h2 class="h3 sd__h">{d.services.learnMore}</h2>
+        <ul class="sd__list">
+          {s.bullets.map((b, i) => (
+            <li class="reveal" style={`--reveal-delay:${i * 50}ms`}>
+              <Icon name="check" size={16} class="sd__tick" /><span>{b}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <aside class="sd__aside reveal">
+        <div class="sd__card">
+          <h2 class="h4 sd__cardh">{d.contact.heading}</h2>
+          <p class="sd__cardp">{d.contact.lead}</p>
+          <a class="btn sd__cardbtn" href={site.phoneHref}>
+            <Icon name="phone" size={17} />{site.phone}
+          </a>
+          <a class="btn btn--ghost sd__cardbtn" href={href(lang, '/contact')}>{d.cta.primary}</a>
+          <ul class="sd__marks">
+            <li><Icon name="check" size={15} />{d.trust.freeEstimate}</li>
+            <li><Icon name="check" size={15} />{d.trust.writtenQuote}</li>
+            <li><Icon name="check" size={15} />{d.trust.korean}</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <Gallery lang={lang} limit={9} tone="paper2" />
+
+  <section class="section section--tight">
+    <div class="wrap">
+      <h2 class="h3 sd__otherh reveal">{d.cta.allServices}</h2>
+      <ul class="sd__others">
+        {others.map((o, i) => (
+          <li class="reveal" style={`--reveal-delay:${i * 70}ms`}>
+            <a class="sd__other" href={href(lang, `/services/${o.slug}`)}>
+              <Picture slug={o.photo} lang={lang} sizes="(min-width: 800px) 30vw, 92vw" class="sd__otherimg" />
+              <span class="sd__otherbody">
+                <span class="h4">{o.title}</span>
+                <span class="sd__otherlink">{d.services.learnMore}<Icon name="arrow" size={15} /></span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="reveal" style="margin-top:1.75rem">
+        <a class="link-arrow" href={href(lang, '/services')}>{d.cta.back}<Icon name="arrow" size={16} /></a>
+      </p>
+    </div>
+  </section>
+
+  <Faq lang={lang} />
+  <CtaBand lang={lang} />
+</Base>
+
+<style>
+  .sd-hero {
+    position: relative; isolation: isolate; overflow: hidden;
+    background: var(--ink); color: var(--on-ink);
+    padding: clamp(3rem, 7vw, 5.5rem) 0 clamp(3rem, 6vw, 5rem);
+  }
+  .sd-hero__media { position: absolute; inset: 0; z-index: -2; }
+  .sd-hero__media :global(.sd-hero__img) { width: 100%; height: 100%; object-fit: cover; }
+  .sd-hero::before {
+    content: ''; position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(100deg, rgba(12,16,20,.96) 22%, rgba(12,16,20,.8) 66%, rgba(12,16,20,.6) 100%);
+  }
+  .sd-hero__inner { position: relative; max-width: 54rem; }
+  .sd-hero__h { color: #fff; }
+  .sd-hero__lead { color: rgba(251,249,246,.88); margin-top: 1rem; }
+  .sd-hero__time {
+    display: inline-flex; align-items: center; gap: 0.5rem; margin: 1.25rem 0 0;
+    font-size: 0.89rem; color: var(--on-ink-2);
+  }
+  .sd-hero__time :global(svg) { color: var(--brass-glow); }
+  .sd-hero__time strong { color: #fff; font-weight: 600; }
+  .sd-hero__row { margin-top: 1.9rem; }
+
+  .crumbs { margin-bottom: 1.5rem; }
+  .crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; font-size: 0.82rem; }
+  .crumbs li { color: var(--on-ink-3); }
+  .crumbs li + li::before { content: '/'; margin-inline-end: 0.5rem; opacity: 0.55; }
+  .crumbs a { color: var(--on-ink-2); text-decoration: none; }
+  .crumbs a:hover { color: var(--brass-glow); text-decoration: underline; }
+
+  .sd__grid {
+    display: grid; gap: clamp(2rem, 4vw, 3.5rem);
+    grid-template-columns: 1fr; align-items: start;
+  }
+  @media (min-width: 980px) { .sd__grid { grid-template-columns: 1fr 22rem; } }
+
+  .sd__long { font-size: 1.08rem; line-height: 1.78; color: var(--text-2); max-width: 64ch; }
+  .sd__h { margin: 2.25rem 0 1.1rem; }
+  .sd__list { display: grid; gap: 0.85rem; max-width: 64ch; }
+  .sd__list li { display: flex; gap: 0.75rem; align-items: flex-start; color: var(--text-2); font-size: 0.97rem; line-height: 1.62; }
+  .sd__list :global(.sd__tick) { color: var(--brass); flex: none; margin-top: 4px; }
+
+  .sd__aside { position: sticky; top: 7rem; }
+  @media (max-width: 979px) { .sd__aside { position: static; } }
+  .sd__card {
+    background: var(--paper-2); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); padding: 1.6rem;
+    display: grid; gap: 0.8rem;
+  }
+  .sd__cardh { margin-bottom: 0; }
+  .sd__cardp { margin: 0; font-size: 0.92rem; color: var(--text-2); line-height: 1.6; }
+  .sd__cardbtn { width: 100%; }
+  .sd__marks { display: grid; gap: 0.5rem; margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+  .sd__marks li { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-2); }
+  .sd__marks :global(svg) { color: var(--brass); flex: none; }
+
+  .sd__otherh { margin-bottom: 1.5rem; }
+  .sd__others {
+    display: grid; gap: clamp(1rem, 2vw, 1.5rem);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  }
+  .sd__other {
+    display: block; text-decoration: none; color: var(--text);
+    border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden;
+    transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+  }
+  .sd__other:hover { transform: translateY(-5px); box-shadow: var(--shadow); color: var(--text); }
+  .sd__other :global(.sd__otherimg) { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+  .sd__otherbody { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem 1.2rem; }
+  .sd__otherlink { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 600; color: var(--brass-ink); white-space: nowrap; }
+</style>

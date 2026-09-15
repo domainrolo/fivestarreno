@@ -1,0 +1,67 @@
+---
+import { t, type Lang } from '~/i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = t(lang);
+---
+<section class="section section--paper2" aria-labelledby="cost-h">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">{d.costs.eyebrow}</p>
+      <h2 class="h2" id="cost-h">{d.costs.heading}</h2>
+      <p class="lead">{d.costs.lead}</p>
+    </div>
+
+    <div class="cost__wrap reveal">
+      <table class="cost">
+        <caption class="sr-only">{d.costs.heading}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{d.costs.colWork}</th>
+            <th scope="col">{d.costs.colRange}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {d.costs.rows.map((r) => (
+            <tr>
+              <th scope="row">{r.work}</th>
+              <td>{r.range}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="cost__note reveal">{d.costs.footnote}</p>
+  </div>
+</section>
+
+<style>
+  .cost__wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line); border-radius: var(--radius-lg);
+    background: var(--paper);
+  }
+  .cost { width: 100%; border-collapse: collapse; min-width: 30rem; }
+  .cost th, .cost td { text-align: start; padding: 1rem 1.3rem; }
+  .cost thead th {
+    font-family: var(--font-body);
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-3); border-bottom: 1px solid var(--line);
+    background: var(--paper-2);
+  }
+  :global(html[lang^='ko']) .cost thead th { letter-spacing: 0.06em; }
+  .cost tbody tr + tr th, .cost tbody tr + tr td { border-top: 1px solid var(--line-2); }
+  .cost tbody th { font-weight: 500; font-family: var(--font-body); font-size: 0.97rem; }
+  .cost tbody td {
+    font-weight: 600; color: var(--brass-ink); white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .cost tbody tr { transition: background 0.2s var(--ease); }
+  .cost tbody tr:hover { background: var(--brass-wash); }
+
+  .cost__note {
+    margin-top: 1.25rem; font-size: 0.86rem; color: var(--text-3);
+    max-width: 68ch;
+  }
+</style>
